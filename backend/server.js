@@ -1,3 +1,6 @@
+require("dotenv").config();
+
+
 const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
@@ -25,11 +28,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
-app.use('/api/auth',        require('./routes/authRoutes'))
-app.use('/api/tasks',       require('./routes/taskRoutes'))
+app.use('/api/auth', require('./routes/authRoutes'))
+app.use('/api/tasks', require('./routes/taskRoutes'))
 app.use('/api/evaluations', require('./routes/evaluationRoutes'))
-app.use('/api/reports',     require('./routes/reportRoutes'))
-app.use('/api/students',    require('./routes/studentRoutes'))
+app.use('/api/reports', require('./routes/reportRoutes'))
+app.use('/api/students', require('./routes/studentRoutes'))
 app.use('/api/internships', require('./routes/internshipRoutes'))
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
