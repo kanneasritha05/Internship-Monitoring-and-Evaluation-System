@@ -1,26 +1,30 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const internshipSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
-  company: String,
+  companyName: String,
   domain: String,
-  location: String,
   duration: String,
-
-  mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  location: String,
+  startDate: Date,
+  stipend: String,
+  offerLetter: String,
 
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
-  adminFeedback: {
-  type: String,
-  default: ''
-},
 
-  rejectionReason: { type: String, default: '' }
+  mentor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+
+  feedback: {
+    type: String
+  }
 
 }, { timestamps: true });
 

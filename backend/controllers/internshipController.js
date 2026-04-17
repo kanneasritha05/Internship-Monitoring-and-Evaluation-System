@@ -2,16 +2,18 @@ const Internship = require('../models/Internship');
 const Student = require('../models/Student');
 
 
-// ✅ 1. SUBMIT INTERNSHIP (ONLY ONCE)
+// ✅ 1. SUBMIT INTERNSHIP
 exports.submitInternship = async (req, res) => {
   try {
+     console.log("BODY:", req.body);
+console.log("FILE:", req.file);
+console.log("USER:", req.user);
     const { company, domain, location, duration } = req.body;
 
     if (!company || !domain || !location || !duration) {
       return res.status(400).json({ message: 'All fields required' });
     }
 
-    // 🔒 Check if already submitted
     const existing = await Internship.findOne({ student: req.user._id });
 
     if (existing && existing.status !== 'rejected') {
@@ -20,7 +22,6 @@ exports.submitInternship = async (req, res) => {
       });
     }
 
-    // 🔁 If rejected → allow update instead of new create
     let internship;
 
     if (existing && existing.status === 'rejected') {
@@ -59,7 +60,7 @@ exports.submitInternship = async (req, res) => {
 };
 
 
-// ✅ 2. GET MY INTERNSHIP (STUDENT)
+// ✅ 2. GET MY INTERNSHIP
 exports.getMyInternship = async (req, res) => {
   try {
     const internship = await Internship.findOne({ student: req.user._id })
@@ -94,7 +95,7 @@ exports.getAllInternships = async (req, res) => {
 };
 
 
-// ✅ 4. APPROVE INTERNSHIP (ADMIN)
+// ✅ 4. APPROVE INTERNSHIP
 exports.approveInternship = async (req, res) => {
   try {
     const { mentorId, feedback } = req.body;
@@ -105,14 +106,16 @@ exports.approveInternship = async (req, res) => {
       return res.status(404).json({ message: 'Internship not found' });
     }
 
-    // ✅ Update internship
     internship.status = 'approved';
     internship.adminFeedback = feedback || 'Approved successfully';
-    internship.mentor = mentorId || null;
+
+    if (mentorId) {
+      internship.mentor = mentorId;
+    }
 
     await internship.save();
 
-    // ✅ Create or update student
+    // sync Student collection
     let student = await Student.findOne({ user: internship.student });
 
     if (!student) {
@@ -140,7 +143,7 @@ exports.approveInternship = async (req, res) => {
 };
 
 
-// ✅ 5. REJECT INTERNSHIP (ADMIN)
+// ✅ 5. REJECT INTERNSHIP
 exports.rejectInternship = async (req, res) => {
   try {
     const { feedback } = req.body;
@@ -167,7 +170,7 @@ exports.rejectInternship = async (req, res) => {
 };
 
 
-// ✅ 6. ALLOT MENTOR (OPTIONAL - ADMIN)
+// ✅ 6. OPTIONAL: ALLOT MENTOR
 exports.allotMentor = async (req, res) => {
   try {
     const { mentorId } = req.body;
@@ -179,6 +182,70 @@ exports.allotMentor = async (req, res) => {
     ).populate('mentor', 'name email');
 
     res.json(internship);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// ✅ 7. GET APPROVED STUDENTS (FIX FOR YOUR UI)
+exports.getApprovedStudents = async (req, res) => {
+  try {
+    const data = await Internship.find({ status: 'approved' })
+      .populate('student', 'name email')
+      .populate('mentor', 'name email');
+
+    const formatted = data.map(i => ({
+      _id: i._id,
+      user: i.student,
+      internshipDomain: i.domain,
+      mentor: i.mentor,
+      status: i.status
+    }));
+
+    res.json(formatted);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// ✅ 8. ADMIN ALLOT MENTOR (FOR YOUR FRONTEND)
+exports.adminAllotMentor = async (req, res) => {
+  try {
+    const { studentId, mentorId } = req.body;
+
+    const internship = await Internship.findByIdAndUpdate(
+      studentId,
+      { mentor: mentorId },
+      { new: true }
+    )
+    .populate('student', 'name email')
+    .populate('mentor', 'name email');
+
+    const formatted = {
+      _id: internship._id,
+      user: internship.student,
+      internshipDomain: internship.domain,
+      mentor: internship.mentor,
+      status: internship.status
+    };
+
+    res.json(formatted);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// ✅ 9. DELETE STUDENT (FROM INTERNSHIP)
+exports.deleteStudentInternship = async (req, res) => {
+  try {
+    await Internship.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Deleted successfully' });
 
   } catch (err) {
     res.status(500).json({ message: err.message });

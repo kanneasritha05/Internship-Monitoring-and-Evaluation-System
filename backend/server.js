@@ -30,7 +30,7 @@ app.use('/api/tasks',       require('./routes/taskRoutes'))
 app.use('/api/evaluations', require('./routes/evaluationRoutes'))
 app.use('/api/reports',     require('./routes/reportRoutes'))
 app.use('/api/students',    require('./routes/studentRoutes'))
-app.use('/api/internships', require('./routes/internshipRoutes'))
+app.use('/api/internship', require('./routes/internshipRoutes'))
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 

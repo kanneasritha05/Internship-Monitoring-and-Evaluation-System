@@ -10,13 +10,13 @@ export default function InternshipRequests() {
   const [reason, setReason] = useState({})
 
   useEffect(() => {
-    api.get('/internships').then(r => setInternships(r.data)).catch(() => {})
+    api.get('/internship').then(r => setInternships(r.data)).catch(() => {})
     api.get('/auth/mentors').then(r => setMentors(r.data)).catch(() => {})
   }, [])
 
   const approve = async (id) => {
     try {
-      await api.put(`/internships/${id}/approve`, { mentorId: selectedMentor[id] || null })
+      await api.put(`/internship/${id}/approve`, { mentorId: selectedMentor[id] || null })
       setInternships(prev => prev.map(i => i._id===id ? {...i, status:'approved'} : i))
       toast.success('Internship approved!')
     } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
@@ -24,7 +24,7 @@ export default function InternshipRequests() {
 
   const reject = async (id) => {
     try {
-      await api.put(`/internships/${id}/reject`, { reason: reason[id] || 'Not specified' })
+      await api.put(`/internship/${id}/reject`, { feedback: reason[id] || 'Not specified' })
       setInternships(prev => prev.map(i => i._id===id ? {...i, status:'rejected'} : i))
       toast.success('Internship rejected')
     } catch (err) { toast.error('Failed') }
@@ -121,7 +121,7 @@ export default function InternshipRequests() {
             )}
             {i.status === 'rejected' && (
               <div style={{ fontSize:'0.72rem', color:'#f87171' }}>
-                ❌ Rejected · Reason: {i.rejectionReason || 'Not specified'}
+                ❌ Rejected · Reason: {i.adminFeedback || 'Not specified'}
               </div>
             )}
           </div>

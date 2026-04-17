@@ -11,26 +11,35 @@ export default function PostInternship() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    api.get('/internships/my').then(r => { if(r.data) setExisting(r.data) }).catch(() => {})
+    api.get('/internship/my').then(r => { if(r.data) setExisting(r.data) }).catch(() => {})
   }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    try {
-      const fd = new FormData()
-      Object.entries(form).forEach(([k,v]) => fd.append(k, v))
-      if (file) fd.append('offerLetter', file)
-      await api.post('/internships', fd, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`,'Content-Type': 'multipart/form-data'
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const fd = new FormData();
+
+    Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+
+    if (file) fd.append('offerLetter', file);
+
+    // ✅ FIXED LINE
+    await api.post('/internship', fd, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`
   }
 });
-      toast.success('Internship submitted for approval!')
-      navigate('/my-internship')
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit')
-    } finally { setLoading(false) }
-  }
 
+    toast.success('Internship submitted for approval!');
+    navigate('/my-internship');
+
+  } catch (err) {
+    console.log("ERROR:", err.response?.data || err.message);
+    toast.error(err.response?.data?.message || 'Failed to submit');
+  } finally {
+    setLoading(false);
+  }
+};
   if (existing) return (
     <div>
       <h1 style={{ color:'#fff', fontSize:'1.3rem', fontWeight:900, marginBottom:'20px' }}>

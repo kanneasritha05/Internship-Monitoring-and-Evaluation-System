@@ -5,10 +5,11 @@ const Student = require('../models/Student')
 // ✅ CREATE REPORT
 exports.createReport = async (req, res) => {
   try {
-    const internship = await Internship.findOne({
-      student: req.user._id,
-      status: 'approved'
-    })
+    const internship = await Internship.findOne({ student: req.user._id });
+    if (!internship || internship.status !== 'approved') {
+      return res.status(400).json({
+        message: "Internship not approved yet"});
+}
 
     if (!internship) {
       return res.status(403).json({ message: 'You need approved internship' })

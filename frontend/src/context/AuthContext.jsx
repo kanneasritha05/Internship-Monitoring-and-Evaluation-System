@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   // ✅ STORE TOKEN (MOST IMPORTANT LINE)
   localStorage.setItem('token', res.data.token);
-
+  localStorage.setItem('user', JSON.stringify(res.data)); 
   setUser(res.data);
 
   return res.data;
