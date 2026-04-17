@@ -6,17 +6,19 @@ const Student = require('../models/Student')
 exports.createReport = async (req, res) => {
   try {
     const internship = await Internship.findOne({
+      _id: req.body.internship,
       student: req.user._id,
       status: 'approved'
-    })
+    });
 
     if (!internship) {
-      return res.status(403).json({ message: 'You need approved internship' })
+      return res.status(403).json({ message: 'You need an approved internship for the selected id' });
     }
 
     const report = await Report.create({
       ...req.body,
       student: req.user._id,
+      internship: internship._id,
       documentFile: req.file ? req.file.filename : null,
     })
 
@@ -29,8 +31,13 @@ exports.createReport = async (req, res) => {
 // ✅ STUDENT REPORTS
 exports.getReports = async (req, res) => {
   try {
-    const reports = await Report.find({ student: req.user._id })
+    const { internshipId } = req.query;
+    const filter = { student: req.user._id };
+    if (internshipId) filter.internship = internshipId;
+
+    const reports = await Report.find(filter)
       .populate('student', 'name email')
+      .populate('internship')
       .sort('-createdAt')
 
     res.json(reports)
@@ -40,23 +47,43 @@ exports.getReports = async (req, res) => {
 }
 
 // ✅ MENTOR REPORTS (VERY IMPORTANT)
+// ✅ MENTOR REPORTS (RETRIEVE ALL OR FILTER BY STUDENT)
 exports.getMentorReports = async (req, res) => {
   try {
-    const students = await Student.find({ mentor: req.user._id })
+    const { studentId, internshipId } = req.query;
+    
+    // Ensure the mentor is assigned to the requested student (if studentId provided)
+    if (studentId) {
+      const studentProfile = await Student.findOne({ user: studentId, mentor: req.user._id });
+      if (!studentProfile) return res.status(403).json({ message: 'Student not assigned to you' });
+      
+      const filter = { student: studentId };
+      if (internshipId) filter.internship = internshipId;
 
-    const studentIds = students.map(s => s.user)
+      const reports = await Report.find(filter)
+        .populate('student', 'name email')
+        .populate('internship')
+        .sort('-createdAt');
+      return res.json(reports);
+    }
 
-    const reports = await Report.find({
-      student: { $in: studentIds }
-    })
+    // Default: Get all reports for all assigned students
+    const students = await Student.find({ mentor: req.user._id });
+    const assignedIds = students.map(s => s.user);
+
+    const filter = { student: { $in: assignedIds } };
+    if (internshipId) filter.internship = internshipId;
+
+    const reports = await Report.find(filter)
       .populate('student', 'name email')
-      .sort('-createdAt')
+      .populate('internship')
+      .sort('-createdAt');
 
-    res.json(reports)
+    res.json(reports);
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    res.status(500).json({ message: err.message });
   }
-}
+};
 
 // ✅ EVALUATE REPORT
 exports.evaluateReport = async (req, res) => {

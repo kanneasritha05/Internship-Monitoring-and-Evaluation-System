@@ -32,6 +32,16 @@ exports.register = async (req, res) => {
       department
     })
 
+    // 🆕 Create Student Profile if role is student
+    if (user.role === 'student') {
+      await Student.create({
+        user: user._id,
+        department: user.department,
+        enrollmentNumber: `EN-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        status: 'pending'
+      })
+    }
+
     const token = generateToken(user._id)
 
     res.status(201).json({

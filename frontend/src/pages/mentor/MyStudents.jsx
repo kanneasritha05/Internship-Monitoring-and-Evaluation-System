@@ -1,43 +1,99 @@
-import { useEffect, useState } from 'react'
-import api from '../../api/axios'
+import { useEffect, useState } from 'react';
+import api from '../../api/axios';
+import { FaUserGraduate, FaEnvelope, FaLaptopCode, FaUniversity, FaCircle } from 'react-icons/fa';
 
 export default function MyStudents() {
-  const [students, setStudents] = useState([])
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/students/my-students').then(r => setStudents(r.data)).catch(() => {})
-  }, [])
+    api.get('/students/my-students')
+      .then(r => setStudents(r.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="p-20 text-center text-gray-500 font-medium">Loading your students...</div>;
 
   return (
-    <div>
-      <h1 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 900, marginBottom: '20px' }}>My <span style={{ color: '#a78bfa' }}>Students</span></h1>
-      <div style={{ background: '#0d0d22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              {['Name', 'Email', 'Domain', 'College', 'Status'].map(h => (
-                <th key={h} style={{ textAlign: 'left', padding: '10px 14px', color: '#555', fontSize: '0.7rem', fontWeight: 700 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {students.length === 0
-              ? <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#555' }}>No students found</td></tr>
-              : students.map((s, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <td style={{ padding: '10px 14px', color: '#fff', fontWeight: 600 }}>{s.user?.name}</td>
-                  <td style={{ padding: '10px 14px', color: '#888' }}>{s.user?.email}</td>
-                  <td style={{ padding: '10px 14px', color: '#bbb' }}>{s.internshipDomain}</td>
-                  <td style={{ padding: '10px 14px', color: '#bbb' }}>{s.college}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '20px', fontWeight: 700, background: s.status === 'active' ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)', color: s.status === 'active' ? '#4ade80' : '#f87171' }}>{s.status}</span>
+    <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 animate-fadeIn">
+      <div>
+        <h1 className="text-3xl font-black text-white tracking-tight">
+          My <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Students</span>
+        </h1>
+        <p className="text-gray-500 text-sm font-medium mt-1">Manage and monitor students under your mentorship</p>
+      </div>
+
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/[0.02] border-b border-white/5">
+                {[
+                  { l: 'Student Info', ic: <FaUserGraduate /> },
+                  { l: 'Domain', ic: <FaLaptopCode /> },
+                  { l: 'University', ic: <FaUniversity /> },
+                  { l: 'Status', ic: <FaCircle size={8} /> }
+                ].map(h => (
+                  <th key={h.l} className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                    <div className="flex items-center gap-2">
+                       <span className="opacity-50">{h.ic}</span> {h.l}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-8 py-20 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <FaUserGraduate className="text-gray-700 text-4xl mb-2" />
+                      <p className="text-white font-bold text-lg">No Students Allotted</p>
+                      <p className="text-gray-500 text-sm">Once the admin assigns students to you, they will appear here.</p>
+                    </div>
                   </td>
                 </tr>
-              ))
-            }
-          </tbody>
-        </table>
+              ) : (
+                students.map((s) => (
+                  <tr key={s._id} className="group hover:bg-white/[0.02] transition-colors">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-400 font-bold group-hover:scale-110 transition-transform">
+                          {s.user?.name?.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-sm tracking-wide">{s.user?.name}</div>
+                          <div className="text-gray-500 text-xs flex items-center gap-1.5 mt-0.5">
+                            <FaEnvelope className="text-[10px]" /> {s.user?.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-indigo-400 font-bold text-xs tracking-wider">{s.internshipDomain || 'Not Set'}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="text-gray-300 font-medium text-sm">{s.college || 'N/A'}</div>
+                      <div className="text-gray-600 text-[10px] font-black uppercase tracking-widest mt-1">{s.department || 'General'}</div>
+                    </td>
+                    <td className="px-8 py-6">
+                       <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                        s.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                        s.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                        'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'approved' ? 'bg-emerald-400' : s.status === 'pending' ? 'bg-amber-400' : 'bg-rose-400'}`} />
+                        {s.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+}

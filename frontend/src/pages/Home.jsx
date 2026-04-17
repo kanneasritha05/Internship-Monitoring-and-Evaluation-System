@@ -1,55 +1,68 @@
 import { useNavigate } from 'react-router-dom';
+import homeBg from '../assets/home_bg.png';
 
 export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#05050f] flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
-      <div className="absolute w-96 h-96 rounded-full bg-purple-600/10 blur-3xl top-0 left-0 pointer-events-none" />
-      <div className="absolute w-72 h-72 rounded-full bg-pink-600/8 blur-3xl bottom-0 right-0 pointer-events-none" />
+    <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url(${homeBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-[#07071a]/80 via-[#07071a]/60 to-[#07071a]" />
+      </div>
 
-      <div className="relative z-10">
-        <div className="inline-flex items-center gap-2 bg-purple-600/10 border border-purple-500/30 rounded-full px-4 py-1.5 text-xs text-purple-400 mb-6">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          Summer 2026 Batch Active
+      {/* Animated Blur Orbs */}
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-purple-600/20 blur-[120px] -top-48 -left-24 animate-pulse pointer-events-none" />
+      <div className="absolute w-[400px] h-[400px] rounded-full bg-blue-600/10 blur-[100px] -bottom-24 -right-12 animate-pulse pointer-events-none" />
+
+      <div className="relative z-10 max-w-4xl">
+        <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2 text-xs text-purple-300 mb-8 shadow-2xl">
+          <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
+          <span className="font-medium">Summer 2026 Batch Enrollment Open</span>
         </div>
 
-        <h1 className="text-5xl font-black text-white leading-tight mb-4">
-          Internship Monitoring<br />
-          <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
-            Made Brilliant
+        <h1 className="text-6xl md:text-7xl font-black text-white leading-tight mb-8 tracking-tight">
+          <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            InternTrack
           </span>
         </h1>
 
-        <p className="text-gray-500 text-base max-w-md mx-auto mb-8 leading-relaxed">
-          Track interns, evaluate reports, manage attendance and
-          generate scorecards — one platform for everyone.
+        <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+          A platform to track, manage, and evaluate student internships efficiently
         </p>
 
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-5 justify-center mb-16">
           <button
             onClick={() => navigate('/login')}
-            className="bg-gradient-to-r from-purple-600 to-violet-600 text-white px-8 py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition hover:-translate-y-0.5"
+            className="group relative bg-white text-[#07071a] px-10 py-4 rounded-2xl font-bold text-base hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
           >
-            Get Started →
+            Login
+            <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
           </button>
           <button
             onClick={() => navigate('/register')}
-            className="bg-transparent border border-purple-500/40 text-purple-300 px-7 py-3.5 rounded-xl font-bold text-sm hover:bg-purple-600/10 transition"
+            className="group bg-white/5 backdrop-blur-md border border-white/10 text-white px-10 py-4 rounded-2xl font-bold text-base hover:bg-white/10 transition-all duration-300"
           >
-            Register Now
+            Register
           </button>
         </div>
 
-        <div className="flex gap-10 justify-center mt-12">
+        <div className="grid grid-cols-3 gap-8 md:gap-16 border-t border-white/5 pt-12">
           {[
-            { n: '48+', l: 'Active Interns' },
-            { n: '3',   l: 'Roles Supported' },
-            { n: '98%', l: 'Satisfaction' },
+            { n: '500+', l: 'Happy Interns' },
+            { n: '50+', l: 'Top Mentors' },
+            { n: '100%', l: 'Secure Data' },
           ].map((s) => (
-            <div key={s.l} className="text-center">
-              <div className="text-2xl font-black text-white">{s.n}</div>
-              <div className="text-xs text-gray-600 mt-1">{s.l}</div>
+            <div key={s.l} className="group">
+              <div className="text-3xl font-black text-white mb-1 group-hover:text-purple-400 transition-colors">{s.n}</div>
+              <div className="text-sm text-gray-500 font-medium uppercase tracking-wider">{s.l}</div>
             </div>
           ))}
         </div>

@@ -18,7 +18,7 @@ router.get('/my-students', authorize('mentor'), async (req, res) => {
 // Admin sees all students
 router.get('/', authorize('admin'), async (req, res) => {
   try {
-   const students = await Student.find({ status: 'approved' })
+   const students = await Student.find()
       .populate('user', 'name email')
       .populate('mentor', 'name email');
     res.json(students);
@@ -57,12 +57,7 @@ router.get('/requests', authorize('admin'), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-router.get('/my-students', authorize('mentor'), async (req, res) => {
-  const students = await Student.find({ mentor: req.user._id })
-    .populate('user', 'name email');
 
-  res.json(students);
-});
 router.get('/:id', authorize('admin'), async (req, res) => {
   try {
     const student = await Student.findById(req.params.id)

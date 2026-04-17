@@ -9,20 +9,24 @@ export const AuthProvider = ({ children }) => {
   );
 
   const login = async (email, password) => {
-  const res = await api.post('/auth/login', { email, password });
+    const res = await api.post('/auth/login', { email, password });
+    
+    // ✅ CONSISTENT STORAGE
+    localStorage.setItem('user', JSON.stringify(res.data));
+    localStorage.setItem('token', res.data.token);
 
-  // ✅ STORE TOKEN (MOST IMPORTANT LINE)
-  localStorage.setItem('token', res.data.token);
-
-  setUser(res.data);
-
-  return res.data;
-};
+    setUser(res.data);
+    return res.data;
+  };
 
   const register = async (formData) => {
     const { data } = await api.post('/auth/register', formData);
-    setUser(data);
+    
+    // ✅ CONSISTENT STORAGE
     localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('token', data.token);
+
+    setUser(data);
     return data;
   };
 

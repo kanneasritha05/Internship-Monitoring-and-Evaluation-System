@@ -1,140 +1,250 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../../api/axios'
-import toast from 'react-hot-toast'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
+import { FaBuilding, FaMapMarkerAlt, FaCalendarAlt, FaMoneyBillWave, FaFileUpload, FaPaperPlane, FaClock, FaCheckCircle, FaHourglassHalf, FaTimesCircle } from 'react-icons/fa';
 
 export default function PostInternship() {
-  const [existing, setExisting] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({ company:'', domain:'Full Stack', location:'', duration:'3 months', startDate:'', stipend:'' })
-  const [file, setFile] = useState(null)
-  const navigate = useNavigate()
+  const [internships, setInternships] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ company: '', domain: 'Full Stack', location: '', duration: '3 months', startDate: '', stipend: '' });
+  const [file, setFile] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/internships/my').then(r => { if(r.data) setExisting(r.data) }).catch(() => {})
-  }, [])
+    api.get('/internships/my')
+      .then(r => setInternships(Array.isArray(r.data) ? r.data : [r.data]))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
-      const fd = new FormData()
-      Object.entries(form).forEach(([k,v]) => fd.append(k, v))
-      if (file) fd.append('offerLetter', file)
-      await api.post('/internships', fd, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`,'Content-Type': 'multipart/form-data'
-  }
-});
-      toast.success('Internship submitted for approval!')
-      navigate('/my-internship')
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      if (file) fd.append('offerLetter', file);
+      await api.post('/internships', fd, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      toast.success('Internship submitted for approval!');
+      navigate('/my-internship');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit')
-    } finally { setLoading(false) }
-  }
-
-  if (existing) return (
-    <div>
-      <h1 style={{ color:'#fff', fontSize:'1.3rem', fontWeight:900, marginBottom:'20px' }}>
-        Post <span style={{ color:'#a78bfa' }}>Internship</span>
-      </h1>
-      <div style={{ background:'rgba(74,222,128,.08)', border:'1px solid rgba(74,222,128,.2)', borderRadius:'14px', padding:'24px', maxWidth:'460px' }}>
-        <div style={{ fontSize:'2rem', marginBottom:'10px' }}>
-          {existing.status === 'approved' ? '✅' : existing.status === 'pending' ? '⏳' : '❌'}
-        </div>
-        <div style={{ color:'#fff', fontWeight:900, fontSize:'1rem', marginBottom:'4px' }}>
-          {existing.company}
-        </div>
-        <div style={{ color:'#666', fontSize:'0.75rem', marginBottom:'12px' }}>
-          {existing.domain} · {existing.location}
-        </div>
-        <span style={{ fontSize:'0.68rem', padding:'3px 10px', borderRadius:'20px', fontWeight:800,
-          background: existing.status==='approved'?'rgba(74,222,128,.15)':existing.status==='pending'?'rgba(251,191,36,.15)':'rgba(248,113,113,.15)',
-          color: existing.status==='approved'?'#4ade80':existing.status==='pending'?'#fbbf24':'#f87171'
-        }}>
-          {existing.status}
-        </span>
-        {existing.status === 'rejected' && (
-          <p style={{ color:'#f87171', fontSize:'0.72rem', marginTop:'12px' }}>
-            Reason: {existing.rejectionReason || 'Contact admin for details'}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-
-  const inp = { width:'100%', background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,255,255,.1)', borderRadius:'9px', padding:'9px 12px', color:'#e2e2f0', fontSize:'0.82rem', outline:'none', fontFamily:'inherit' }
+      toast.error(err.response?.data?.message || 'Failed to submit');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div style={{ maxWidth:'540px' }}>
-      <h1 style={{ color:'#fff', fontSize:'1.3rem', fontWeight:900, marginBottom:'16px' }}>
-        Post <span style={{ color:'#a78bfa' }}>Internship Details</span>
-      </h1>
-      <div style={{ background:'rgba(108,99,255,.08)', border:'1px solid rgba(108,99,255,.2)', borderRadius:'10px', padding:'12px', fontSize:'0.72rem', color:'#888', marginBottom:'16px' }}>
-        📋 Submit your internship details. Admin will review and approve or reject your application.
-        Once approved, a mentor will be assigned to you.
+    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-12 animate-fadeIn">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tight">
+            Apply <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Internship</span>
+          </h1>
+          <p className="text-gray-500 text-sm font-medium mt-1">Submit your internship details for administrative approval</p>
+        </div>
       </div>
-      <div style={{ background:'#0d0d22', border:'1px solid rgba(255,255,255,.06)', borderRadius:'14px', padding:'22px' }}>
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom:'12px' }}>
-            <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Company Name *</label>
-            <input style={inp} value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="e.g. TechCorp Pvt Ltd" required />
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
-            <div style={{ marginBottom:'12px' }}>
-              <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Domain *</label>
-              <select style={inp} value={form.domain} onChange={e=>setForm({...form,domain:e.target.value})}>
-                {['Full Stack','Frontend','Backend','ML/AI','DevOps','Data Science','Android','UI/UX'].map(d=><option key={d}>{d}</option>)}
-              </select>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Form Section */}
+        <div className="space-y-8">
+          <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+            <div className="flex items-center gap-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4 mb-8">
+              <FaClock className="text-purple-400 text-2xl shrink-0" />
+              <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
+                Admin will review your application. Once approved, you will be assigned a mentor to track your weekly progress and evaluations.
+              </p>
             </div>
-            <div style={{ marginBottom:'12px' }}>
-              <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Duration *</label>
-              <select style={inp} value={form.duration} onChange={e=>setForm({...form,duration:e.target.value})}>
-                {['1 month','2 months','3 months','6 months'].map(d=><option key={d}>{d}</option>)}
-              </select>
-            </div>
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
-            <div style={{ marginBottom:'12px' }}>
-              <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Location / Mode *</label>
-              <input style={inp} value={form.location} onChange={e=>setForm({...form,location:e.target.value})} placeholder="Hyderabad / Remote" required />
-            </div>
-            <div style={{ marginBottom:'12px' }}>
-              <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Start Date *</label>
-              <input style={inp} type="date" value={form.startDate} onChange={e=>setForm({...form,startDate:e.target.value})} required />
-            </div>
-          </div>
-          <div style={{ marginBottom:'12px' }}>
-            <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Stipend</label>
-            <input style={inp} value={form.stipend} onChange={e=>setForm({...form,stipend:e.target.value})} placeholder="e.g. ₹5000/month or Unpaid" />
-          </div>
-          <div style={{ marginBottom:'16px' }}>
-            <label style={{ display:'block', fontSize:'0.72rem', color:'#777', marginBottom:'5px', fontWeight:700 }}>Offer Letter / Appointment Letter *</label>
-            <div
-              style={{ border:'2px dashed rgba(108,99,255,.3)', borderRadius:'10px', padding:'20px', textAlign:'center', cursor:'pointer', background:'rgba(108,99,255,.04)', transition:'all .2s' }}
-              onClick={() => document.getElementById('offer-file').click()}
-            >
-              <div style={{ fontSize:'24px', marginBottom:'6px' }}>📄</div>
-              <div style={{ color:'#a78bfa', fontSize:'0.78rem', fontWeight:700 }}>
-                {file ? `✅ ${file.name}` : 'Click to upload offer letter'}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Company Details</label>
+                <div className="relative group">
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-purple-500">
+                    <FaBuilding />
+                  </span>
+                  <input
+                    value={form.company}
+                    onChange={e => setForm({ ...form, company: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                    placeholder="Company Name (e.g. Google, Microsoft)"
+                    required
+                  />
+                </div>
               </div>
-              <div style={{ color:'#555', fontSize:'0.65rem', marginTop:'3px' }}>PDF, DOC, JPG · Max 10MB</div>
-              <input
-                id="offer-file"
-                type="file"
-                accept=".pdf,.doc,.docx,.jpg,.png"
-                style={{ display:'none' }}
-                onChange={e => { if(e.target.files[0]) setFile(e.target.files[0]) }}
-              />
-            </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Domain</label>
+                  <select
+                    value={form.domain}
+                    onChange={e => setForm({ ...form, domain: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer"
+                  >
+                    {['Full Stack', 'Frontend', 'Backend', 'ML/AI', 'DevOps', 'Data Science', 'Android', 'UI/UX'].map(d => (
+                      <option key={d} value={d} className="bg-[#07071a]">{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Duration</label>
+                  <select
+                    value={form.duration}
+                    onChange={e => setForm({ ...form, duration: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer"
+                  >
+                    {['1 month', '2 months', '3 months', '6 months'].map(d => (
+                      <option key={d} value={d} className="bg-[#07071a]">{d}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Work Location</label>
+                  <div className="relative group">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-purple-500">
+                      <FaMapMarkerAlt />
+                    </span>
+                    <input
+                      value={form.location}
+                      onChange={e => setForm({ ...form, location: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                      placeholder="e.g. Hyderabad / Remote"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Start Date</label>
+                  <div className="relative group">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-purple-500">
+                      <FaCalendarAlt />
+                    </span>
+                    <input
+                      type="date"
+                      value={form.startDate}
+                      onChange={e => setForm({ ...form, startDate: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Stipend Details</label>
+                  <div className="relative group">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-purple-500">
+                      <FaMoneyBillWave />
+                    </span>
+                    <input
+                      value={form.stipend}
+                      onChange={e => setForm({ ...form, stipend: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                      placeholder="e.g. ₹15,000 / month"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Offer Letter (PDF/IMG)</label>
+                  <div className="relative group">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-purple-500">
+                      <FaFileUpload />
+                    </span>
+                    <input
+                      type="file"
+                      onChange={e => setFile(e.target.files[0])}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 pl-12 text-white text-xs outline-none focus:ring-2 focus:ring-purple-500/50 transition-all file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-500"
+                      accept=".pdf,.doc,.docx,.jpg,.png"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-purple-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3"
+              >
+                {loading ? 'Processing...' : (
+                  <>
+                    Submit Application <FaPaperPlane className="text-xs" />
+                  </>
+                )}
+              </button>
+            </form>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ width:'100%', background: loading?'#444':'linear-gradient(135deg,#6c3fff,#a855f7)', color:'#fff', border:'none', padding:'12px', borderRadius:'10px', fontSize:'0.9rem', fontWeight:800, cursor: loading?'not-allowed':'pointer' }}
-          >
-            {loading ? 'Submitting...' : 'Submit for Approval →'}
-          </button>
-        </form>
+        </div>
+
+        {/* List Section */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-black text-gray-500 uppercase tracking-widest">Recent Applications ({internships.length})</h2>
+          </div>
+          
+          <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+            {internships.length === 0 ? (
+              <div className="text-center py-20 bg-white/5 border border-dashed border-white/10 rounded-[2.5rem]">
+                <p className="text-gray-600 text-sm font-medium">Your submission history will appear here</p>
+              </div>
+            ) : (
+              internships.map((i, idx) => (
+                <div 
+                  key={idx} 
+                  className="group relative bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-3xl p-6 transition-all duration-300"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="space-y-1">
+                      <h3 className="text-white font-bold text-lg group-hover:text-purple-400 transition-colors">{i.company}</h3>
+                      <div className="flex items-center gap-2 text-gray-500 text-xs font-bold">
+                        <span>{i.domain}</span>
+                        <span className="w-1 h-1 rounded-full bg-gray-700" />
+                        <span>{i.duration}</span>
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center gap-2 ${
+                      i.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                      i.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                      'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                    }`}>
+                      {i.status === 'approved' ? <FaCheckCircle size={10} /> : 
+                       i.status === 'pending' ? <FaHourglassHalf size={10} /> : 
+                       <FaTimesCircle size={10} />}
+                      {i.status}
+                    </div>
+                  </div>
+                  
+                  {i.mentor ? (
+                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
+                          <FaMapMarkerAlt size={12} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest leading-none mb-1">Assigned Mentor</p>
+                          <p className="text-white text-xs font-bold">{i.mentor.name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 pt-4 border-t border-white/5">
+                      <p className="text-[10px] text-gray-600 font-bold uppercase italic italic">Awaiting administrative processing...</p>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
-  )
+  );
 }

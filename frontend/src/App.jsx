@@ -12,7 +12,6 @@ import Register from './pages/Register';
 // Student
 import StudentDashboard from './pages/student/StudentDashboard';
 import SubmitReport from './pages/student/SubmitReport';
-import UploadReport from './pages/student/UploadReport';
 import MyReports from './pages/student/MyReports';
 import MyScorecard from './pages/student/MyScorecard';
 import MyInternship from './pages/student/MyInternship';
@@ -23,9 +22,9 @@ import SubmitInternship from './pages/student/SubmitInternship';
 import MentorDashboard from './pages/mentor/MentorDashboard';
 import MyStudents from './pages/mentor/MyStudents';
 import StudentReports from './pages/mentor/StudentReports';
-import EvaluateStudents from './pages/mentor/EvaluateStudents';
+// import EvaluateStudents from './pages/mentor/EvaluateStudents';
 //import AttendanceView from './pages/mentor/AttendanceView';
-import ReviewReports from './pages/mentor/ReviewReports';
+// import ReviewReports from './pages/mentor/ReviewReports';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -35,6 +34,8 @@ import InternshipRequests from './pages/admin/InternshipRequests'
 //import GenerateScorecard from './pages/admin/GenerateScorecard';
 //import MarkAttendance from './pages/admin/MarkAttendance';
 import AllotMentors from './pages/admin/AllotMentors';
+
+import Footer from './components/Footer';
 
 // Role → Dashboard
 function DashboardRoute() {
@@ -75,39 +76,43 @@ export default function App() {
         <Toaster position="top-right" toastOptions={{
           style: { background: '#1a1a30', color: '#e8e8f0', border: '1px solid rgba(108,99,255,.3)' }
         }} />
-        <div className="min-h-screen bg-[#07071a]">
+        <div className="min-h-screen bg-[#07071a] flex flex-col">
           <Header />
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+          <div className="flex-1">
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            {/* Shared — role decides content */}
-            <Route path="/dashboard" element={<AppLayout><DashboardRoute /></AppLayout>} />
-            <Route path="/reports"   element={<AppLayout><ReportsRoute /></AppLayout>} />
-            <Route path="/students" element={ <AppLayout allowedRoles={['admin']}><AllStudents /></AppLayout>
-  } 
-/>
-            {/* Student only */}
-            <Route path="/upload-report"  element={<AppLayout allowedRoles={['student']}><UploadReport /></AppLayout>} />
-            <Route path="/submit-report"  element={<AppLayout allowedRoles={['student']}><SubmitReport /></AppLayout>} />
-            <Route path="/my-scorecard"   element={<AppLayout allowedRoles={['student']}><MyScorecard /></AppLayout>} />
-            <Route path="/my-internship"  element={<AppLayout allowedRoles={['student']}><MyInternship /></AppLayout>} />
-            <Route path="/post-internship" element={<AppLayout allowedRoles={['student']}><PostInternship /></AppLayout>} />
-            <Route path="/submit-internship" element={<SubmitInternship />} />
-            {/* Mentor only */}
-            <Route path="/evaluate"        element={<AppLayout allowedRoles={['mentor']}><EvaluateStudents /></AppLayout>} />
-            <Route path="/mentor/reports" element={<ReviewReports />} />
+              {/* Shared — role decides content */}
+              <Route path="/dashboard" element={<AppLayout><DashboardRoute /></AppLayout>} />
+              <Route path="/reports" element={<AppLayout><ReportsRoute /></AppLayout>} />
+              <Route path="/students" element={<AppLayout allowedRoles={['admin']}><AllStudents /></AppLayout>
+              }
+              />
+              {/* Student only */}
+              <Route path="/my-reports" element={<AppLayout allowedRoles={['student']}><MyReports /></AppLayout>} />
+              <Route path="/submit-report" element={<AppLayout allowedRoles={['student']}><SubmitReport /></AppLayout>} />
+              <Route path="/my-scorecard" element={<AppLayout allowedRoles={['student']}><MyScorecard /></AppLayout>} />
+              <Route path="/my-internship" element={<AppLayout allowedRoles={['student']}><MyInternship /></AppLayout>} />
+              <Route path="/post-internship" element={<AppLayout allowedRoles={['student']}><PostInternship /></AppLayout>} />
+              <Route path="/submit-internship" element={<AppLayout allowedRoles={['student']}><SubmitInternship /></AppLayout>} />
+              {/* Mentor only */}
+              <Route path="/my-students" element={<AppLayout allowedRoles={['mentor']}><MyStudents /></AppLayout>} />
+              {/* <Route path="/evaluate" element={<AppLayout allowedRoles={['mentor']}><EvaluateStudents /></AppLayout>} /> */}
+              {/* <Route path="/mentor/reports" element={<ReviewReports />} /> */}
 
-            {/* Admin only */}
-            <Route path="/internship-requests" element={<AppLayout allowedRoles={['admin']}><InternshipRequests /></AppLayout>} />
-            <Route path="/allot-mentors" element={<AppLayout allowedRoles={['admin']}><AllotMentors /></AppLayout>} />
+              {/* Admin only */}
+              <Route path="/internship-requests" element={<AppLayout allowedRoles={['admin']}><InternshipRequests /></AppLayout>} />
+              <Route path="/allot-mentors" element={<AppLayout allowedRoles={['admin']}><AllotMentors /></AppLayout>} />
 
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </div>
+          <Footer />
         </div>
       </BrowserRouter>
-      </AuthProvider>
+    </AuthProvider>
   );
 }

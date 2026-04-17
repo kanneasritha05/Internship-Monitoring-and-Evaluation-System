@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  internship: { type: mongoose.Schema.Types.ObjectId, ref: 'Internship' },
 
   week: Number,
   title: String,
@@ -10,7 +11,7 @@ const reportSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected', 'evaluated'],
     default: 'pending'
   },
 

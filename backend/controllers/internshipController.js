@@ -11,44 +11,17 @@ exports.submitInternship = async (req, res) => {
       return res.status(400).json({ message: 'All fields required' });
     }
 
-    // 🔒 Check if already submitted
-    const existing = await Internship.findOne({ student: req.user._id });
-
-    if (existing && existing.status !== 'rejected') {
-      return res.status(400).json({
-        message: `Already submitted. Status: ${existing.status}`
-      });
-    }
-
-    // 🔁 If rejected → allow update instead of new create
-    let internship;
-
-    if (existing && existing.status === 'rejected') {
-      internship = await Internship.findByIdAndUpdate(
-        existing._id,
-        {
-          company,
-          domain,
-          location,
-          duration,
-          status: 'pending',
-          adminFeedback: '',
-          offerLetter: req.file ? req.file.filename : existing.offerLetter
-        },
-        { new: true }
-      );
-    } else {
-      internship = await Internship.create({
-        student: req.user._id,
-        company,
-        domain,
-        location,
-        duration,
-        status: 'pending',
-        adminFeedback: '',
-        offerLetter: req.file ? req.file.filename : null
-      });
-    }
+    // 🔁 Allow multiple internship submissions
+    const internship = await Internship.create({
+      student: req.user._id,
+      company,
+      domain,
+      location,
+      duration,
+      status: 'pending',
+      adminFeedback: '',
+      offerLetter: req.file ? req.file.filename : null
+    });
 
     res.status(201).json(internship);
 
@@ -62,11 +35,11 @@ exports.submitInternship = async (req, res) => {
 // ✅ 2. GET MY INTERNSHIP (STUDENT)
 exports.getMyInternship = async (req, res) => {
   try {
-    const internship = await Internship.findOne({ student: req.user._id })
+    const internships = await Internship.find({ student: req.user._id })
       .populate('student', 'name email')
       .populate('mentor', 'name email');
 
-    res.json(internship);
+    res.json(internships);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
