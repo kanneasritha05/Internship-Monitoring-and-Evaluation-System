@@ -45,6 +45,16 @@ export default function ReviewReports() {
           <p><b>{r.title}</b></p>
           <p>{r.student?.name} - Week {r.week}</p>
           <p>Status: {r.status}</p>
+           {/* ✅ ADD THIS BLOCK HERE */}
+    {r.file && (
+      <a
+        href={`http://localhost:5000/uploads/${r.documentFile}`}
+        target="_blank"
+        rel="noreferrer"
+        style={{ color: 'blue', display: 'block', marginBottom: '8px' }}
+      >
+        📄 View Uploaded Report
+      </a>)}
 
           {r.status === 'pending' && (
             <>

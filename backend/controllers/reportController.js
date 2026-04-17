@@ -14,11 +14,15 @@ exports.createReport = async (req, res) => {
     if (!internship) {
       return res.status(403).json({ message: 'You need approved internship' })
     }
-
+    console.log("MENTOR ID:", internship.mentor);
     const report = await Report.create({
-      ...req.body,
       student: req.user._id,
-      documentFile: req.file ? req.file.filename : null,
+      mentor: Internship.mentor, 
+      week: req.body.week,
+      title: req.body.title,
+      summary: req.body.summary,
+      link: req.body.link,
+      file: req.file ? req.file.filename : null,
     })
 
     res.status(201).json(report)
@@ -40,25 +44,19 @@ exports.getReports = async (req, res) => {
   }
 }
 
-// ✅ MENTOR REPORTS (VERY IMPORTANT)
 exports.getMentorReports = async (req, res) => {
   try {
-    const students = await Student.find({ mentor: req.user._id })
-
-    const studentIds = students.map(s => s.user)
-
     const reports = await Report.find({
-      student: { $in: studentIds }
+      mentor: req.user._id   // ✅ ONLY THIS
     })
       .populate('student', 'name email')
-      .sort('-createdAt')
+      .sort('-createdAt');
 
-    res.json(reports)
+    res.json(reports);
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    res.status(500).json({ message: err.message });
   }
-}
-
+};
 // ✅ EVALUATE REPORT
 exports.evaluateReport = async (req, res) => {
   try {

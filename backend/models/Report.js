@@ -2,15 +2,16 @@ const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-
+  mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   week: Number,
   title: String,
   summary: String,
   link: String,
+  documentFile:String,
 
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected','evaluated'],
     default: 'pending'
   },
 

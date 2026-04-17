@@ -2,54 +2,24 @@ const Internship = require('../models/Internship');
 const Student = require('../models/Student');
 
 
-// ✅ 1. SUBMIT INTERNSHIP
 exports.submitInternship = async (req, res) => {
   try {
-     console.log("BODY:", req.body);
-console.log("FILE:", req.file);
-console.log("USER:", req.user);
     const { company, domain, location, duration } = req.body;
 
     if (!company || !domain || !location || !duration) {
       return res.status(400).json({ message: 'All fields required' });
     }
 
-    const existing = await Internship.findOne({ student: req.user._id });
-
-    if (existing && existing.status !== 'rejected') {
-      return res.status(400).json({
-        message: `Already submitted. Status: ${existing.status}`
-      });
-    }
-
-    let internship;
-
-    if (existing && existing.status === 'rejected') {
-      internship = await Internship.findByIdAndUpdate(
-        existing._id,
-        {
-          company,
-          domain,
-          location,
-          duration,
-          status: 'pending',
-          adminFeedback: '',
-          offerLetter: req.file ? req.file.filename : existing.offerLetter
-        },
-        { new: true }
-      );
-    } else {
-      internship = await Internship.create({
-        student: req.user._id,
-        company,
-        domain,
-        location,
-        duration,
-        status: 'pending',
-        adminFeedback: '',
-        offerLetter: req.file ? req.file.filename : null
-      });
-    }
+    const internship = await Internship.create({
+      student: req.user._id,
+      company,
+      domain,
+      location,
+      duration,
+      status: 'pending',
+      adminFeedback: '',
+      offerLetter: req.file ? req.file.filename : null
+    });
 
     res.status(201).json(internship);
 
@@ -59,13 +29,13 @@ console.log("USER:", req.user);
   }
 };
 
-
 // ✅ 2. GET MY INTERNSHIP
 exports.getMyInternship = async (req, res) => {
   try {
-    const internship = await Internship.findOne({ student: req.user._id })
-      .populate('student', 'name email')
-      .populate('mentor', 'name email');
+    const internships = await Internship.find({ student: req.user._id })
+    .populate('student', 'name email')
+    .populate('mentor', 'name email')
+    .sort('-createdAt');
 
     res.json(internship);
 
@@ -109,9 +79,7 @@ exports.approveInternship = async (req, res) => {
     internship.status = 'approved';
     internship.adminFeedback = feedback || 'Approved successfully';
 
-    if (mentorId) {
-      internship.mentor = mentorId;
-    }
+    internship.mentor = mentorId;
 
     await internship.save();
 
@@ -128,7 +96,7 @@ exports.approveInternship = async (req, res) => {
         enrollmentNumber: Date.now().toString(),
       });
     } else {
-      student.mentor = internship.mentor || student.mentor;
+      student.mentor = internship.mentor;
       student.internshipDomain = internship.domain;
       student.status = 'approved';
       await student.save();

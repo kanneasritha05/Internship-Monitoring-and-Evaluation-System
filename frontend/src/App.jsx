@@ -97,9 +97,7 @@ export default function App() {
             <Route path="/post-internship" element={<AppLayout allowedRoles={['student']}><PostInternship /></AppLayout>} />
             <Route path="/submit-internship" element={<SubmitInternship />} />
             {/* Mentor only */}
-            <Route path="/evaluate"        element={<AppLayout allowedRoles={['mentor']}><EvaluateStudents /></AppLayout>} />
-            <Route path="/mentor/reports" element={<ReviewReports />} />
-
+            <Route path="/evaluate"        element={<AppLayout allowedRoles={['mentor']}><ReviewReports /></AppLayout>} />
             {/* Admin only */}
             <Route path="/internship-requests" element={<AppLayout allowedRoles={['admin']}><InternshipRequests /></AppLayout>} />
             <Route path="/allot-mentors" element={<AppLayout allowedRoles={['admin']}><AllotMentors /></AppLayout>} />
